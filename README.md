@@ -18,9 +18,11 @@ A lightweight, Apple-style **Swift Package Manager** library that embeds a custo
 
 ## Features
 
-- 📋 **List of option buttons** — render any number of settings rows in a clean, Apple-style list
-- ⚙️ **Fully configurable** — supply labels, icons, and action callbacks per row
-- 🎨 **SwiftUI native** — built entirely with SwiftUI; zero UIKit dependencies
+- 📋 **Built-in settings rows** — Privacy Policy, Terms of Service, and Help & Support, each opening in an in-app web sheet
+- 🎨 **Customisable colours** — configure icon foreground and button background colours via `SettingsColors`
+- 🔒 **Edit-mode support** — pass `isEditing` to disable all rows while the host app is in an edit state
+- 🌐 **Safe in-app web views** — `WebViewSheet` wraps `WKWebView` and blocks external navigation, keeping users inside the app
+- 📱 **SwiftUI native** — built entirely with SwiftUI (WebKit used only where system APIs require it)
 - 🔒 **Swift 6 strict concurrency** — safe to use in fully concurrent codebases
 - 📦 **No external dependencies** — pure Swift, nothing to fetch
 
@@ -80,7 +82,12 @@ import CustomSettings
 
 struct ContentView: View {
     var body: some View {
-        SettingsView()
+        SettingsView(
+            colors: SettingsColors(
+                buttonImageForegroundColor: .blue,
+                buttonBackgroundColor: Color(.secondarySystemBackground)
+            )
+        )
     }
 }
 ```
@@ -103,7 +110,12 @@ struct HomeView: View {
             showSettings = true
         }
         .sheet(isPresented: $showSettings) {
-            SettingsView()
+            SettingsView(
+                colors: SettingsColors(
+                    buttonImageForegroundColor: .accentColor,
+                    buttonBackgroundColor: Color(.secondarySystemBackground)
+                )
+            )
         }
     }
 }
@@ -113,30 +125,49 @@ struct HomeView: View {
 
 ## Configuration
 
-Each row in the settings list is represented by a `SettingsRow` that accepts a label, an optional SF Symbol icon, and an action closure:
+### `SettingsColors`
+
+Pass a `SettingsColors` instance to `SettingsView` to control the appearance of every row:
+
+| Parameter                    | Type    | Description                              |
+|------------------------------|---------|------------------------------------------|
+| `buttonImageForegroundColor` | `Color` | Colour applied to each row's SF Symbol icon |
+| `buttonBackgroundColor`      | `Color` | Background colour of each row button     |
 
 ```swift
-import SwiftUI
-import CustomSettings
-
-struct ContentView: View {
-    var body: some View {
-        SettingsView(rows: [
-            SettingsRow(title: "Notifications", icon: "bell") {
-                // handle tap
-            },
-            SettingsRow(title: "Privacy", icon: "lock.shield") {
-                // handle tap
-            },
-            SettingsRow(title: "About", icon: "info.circle") {
-                // handle tap
-            }
-        ])
-    }
-}
+let colors = SettingsColors(
+    buttonImageForegroundColor: .indigo,
+    buttonBackgroundColor: Color(.secondarySystemBackground)
+)
 ```
 
-> **Note:** The public API is under active development. Configuration options will expand in future releases.
+### `SettingsView`
+
+| Parameter   | Type            | Default | Description                                      |
+|-------------|-----------------|---------|--------------------------------------------------|
+| `colors`    | `SettingsColors` | —      | Colour configuration for all rows                |
+| `isEditing` | `Bool`          | `false` | When `true`, all rows are disabled               |
+
+The view includes three built-in rows that open an in-app web sheet:
+
+| Row              | URL loaded                                      |
+|------------------|-------------------------------------------------|
+| Privacy Policy   | `…/pain-tracker/privacy-policy.html`            |
+| Terms of Service | `…/pain-tracker/terms.html`                     |
+| Help & Support   | `…/pain-tracker/support.html`                   |
+
+### `SettingsRow`
+
+Individual rows can also be used standalone:
+
+```swift
+SettingsRow(
+    title: "Notifications",
+    icon: "bell",
+    action: { /* handle tap */ }
+)
+.environmentObject(colors)
+```
 
 ---
 
