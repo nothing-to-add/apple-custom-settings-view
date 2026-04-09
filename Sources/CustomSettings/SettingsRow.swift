@@ -11,25 +11,23 @@
 import SwiftUI
 
 public struct SettingsRow: View {
-    @EnvironmentObject private var colors: SettingsColors
-    
-    public let title: String
-    public let icon: String
-    public let action: () -> Void
-    
+    let item: SettingsItem
+    let colors: SettingsColors
+    let action: () -> Void
+
     public var body: some View {
         Button(action: action) {
             HStack {
-                Image(systemName: icon)
+                Image(systemName: item.icon)
                     .foregroundColor(colors.buttonImageForegroundColor)
                     .frame(width: 24)
-                
-                Text(title)
+
+                Text(item.title)
                     .font(.subheadline)
                     .foregroundColor(.primary)
-                
+
                 Spacer()
-                
+
                 Image(systemName: "chevron.right")
                     .font(.caption)
                     .foregroundColor(.secondary)
@@ -45,13 +43,12 @@ public struct SettingsRow: View {
 
 #Preview {
     SettingsRow(
-        title: "Notifications",
-        icon: "bell",
+        item: SettingsItem(title: "Notifications", icon: "bell", action: .custom { print("tapped") }),
+        colors: SettingsColors(
+            buttonImageForegroundColor: .blue,
+            buttonBackgroundColor: Color(.secondarySystemBackground)
+        ),
         action: { print("Notifications tapped") }
     )
-    .environmentObject(SettingsColors(
-        buttonImageForegroundColor: .blue,
-        buttonBackgroundColor: Color(.secondarySystemBackground)
-    ))
     .padding()
 }

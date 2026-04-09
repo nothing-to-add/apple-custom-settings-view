@@ -11,8 +11,8 @@
 import SwiftUI
 
 public class SettingsColors: ObservableObject {
-    
-    init(buttonImageForegroundColor: Color, buttonBackgroundColor: Color) {
+
+    public init(buttonImageForegroundColor: Color, buttonBackgroundColor: Color) {
         self.buttonImageForegroundColor = buttonImageForegroundColor
         self.buttonBackgroundColor = buttonBackgroundColor
     }
