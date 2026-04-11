@@ -88,8 +88,58 @@ struct ContentView: View {
                 buttonBackgroundColor: Color(.secondarySystemBackground)
             )
         )
+        .add(.privacyPolicy(url: URL(string: "https://example.com/privacy")!))
+        .add(.termsOfService(url: URL(string: "https://example.com/terms")!))
+        .add(.helpAndSupport(url: URL(string: "https://example.com/support")!))
     }
 }
+```
+
+---
+
+## Adding Items
+
+`SettingsView` uses a **builder pattern** — call `.add(_:)` to append rows. Each call returns a new `SettingsView` with the item appended, so you can chain as many calls as needed.
+
+### Built-in preset items
+
+Three preset `SettingsItem` factories are provided out of the box. Each opens its URL in an in-app web sheet:
+
+| Factory                          | Default title      | SF Symbol            |
+|----------------------------------|--------------------|----------------------|
+| `.privacyPolicy(url:)`           | Privacy Policy     | `lock`               |
+| `.termsOfService(url:)`          | Terms of Service   | `doc.text`           |
+| `.helpAndSupport(url:)`          | Help & Support     | `questionmark.circle`|
+
+```swift
+SettingsView(colors: colors)
+    .add(.privacyPolicy(url: URL(string: "https://example.com/privacy")!))
+    .add(.termsOfService(url: URL(string: "https://example.com/terms")!))
+    .add(.helpAndSupport(url: URL(string: "https://example.com/support")!))
+```
+
+### Custom items
+
+Create a `SettingsItem` directly to add any row with a custom SF Symbol and action:
+
+```swift
+// Opens a URL in an in-app web sheet
+let shareItem = SettingsItem(
+    title: "Rate the App",
+    icon: "star",
+    action: .url(URL(string: "https://apps.apple.com/app/id000000000")!)
+)
+
+// Runs an arbitrary closure
+let logoutItem = SettingsItem(
+    title: "Log Out",
+    icon: "rectangle.portrait.and.arrow.right",
+    action: .custom { AuthService.shared.logOut() }
+)
+
+SettingsView(colors: colors)
+    .add(shareItem)
+    .add(logoutItem)
 ```
 
 ---
@@ -116,6 +166,30 @@ struct HomeView: View {
                     buttonBackgroundColor: Color(.secondarySystemBackground)
                 )
             )
+            .add(.privacyPolicy(url: URL(string: "https://example.com/privacy")!))
+            .add(.termsOfService(url: URL(string: "https://example.com/terms")!))
+            .add(.helpAndSupport(url: URL(string: "https://example.com/support")!))
+        }
+    }
+}
+```
+
+---
+
+## Edit mode
+
+Pass a `Binding<Bool>` to `isEditing` to disable all rows while the host app is in an edit state. When the bound value changes, `SettingsView` reacts immediately:
+
+```swift
+struct ContentView: View {
+    @State private var isEditing = false
+
+    var body: some View {
+        VStack {
+            Toggle("Edit mode", isOn: $isEditing)
+
+            SettingsView(colors: colors, isEditing: $isEditing)
+                .add(.privacyPolicy(url: URL(string: "https://example.com/privacy")!))
         }
     }
 }
@@ -129,10 +203,10 @@ struct HomeView: View {
 
 Pass a `SettingsColors` instance to `SettingsView` to control the appearance of every row:
 
-| Parameter                    | Type    | Description                              |
-|------------------------------|---------|------------------------------------------|
-| `buttonImageForegroundColor` | `Color` | Colour applied to each row's SF Symbol icon |
-| `buttonBackgroundColor`      | `Color` | Background colour of each row button     |
+| Parameter                    | Type    | Description                                    |
+|------------------------------|---------|------------------------------------------------|
+| `buttonImageForegroundColor` | `Color` | Colour applied to each row's SF Symbol icon    |
+| `buttonBackgroundColor`      | `Color` | Background colour of each row button           |
 
 ```swift
 let colors = SettingsColors(
@@ -143,30 +217,34 @@ let colors = SettingsColors(
 
 ### `SettingsView`
 
-| Parameter   | Type            | Default | Description                                      |
-|-------------|-----------------|---------|--------------------------------------------------|
-| `colors`    | `SettingsColors` | —      | Colour configuration for all rows                |
-| `isEditing` | `Bool`          | `false` | When `true`, all rows are disabled               |
+| Parameter   | Type             | Default           | Description                                  |
+|-------------|------------------|-------------------|----------------------------------------------|
+| `colors`    | `SettingsColors` | —                 | Colour configuration for all rows            |
+| `isEditing` | `Binding<Bool>`  | `.constant(false)`| When `true`, all rows are disabled           |
 
-The view includes three built-in rows that open an in-app web sheet:
+### `SettingsAction`
 
-| Row              | URL loaded                                      |
-|------------------|-------------------------------------------------|
-| Privacy Policy   | `…/pain-tracker/privacy-policy.html`            |
-| Terms of Service | `…/pain-tracker/terms.html`                     |
-| Help & Support   | `…/pain-tracker/support.html`                   |
+Each `SettingsItem` carries a `SettingsAction` that determines what happens when the row is tapped:
+
+| Case              | Behaviour                                      |
+|-------------------|------------------------------------------------|
+| `.url(URL)`       | Opens the URL in an in-app `WebViewSheet`      |
+| `.custom(() -> Void)` | Calls the provided closure               |
 
 ### `SettingsRow`
 
-Individual rows can also be used standalone:
+Individual rows can be used standalone if you need to compose a custom layout:
 
 ```swift
 SettingsRow(
-    title: "Notifications",
-    icon: "bell",
+    item: SettingsItem(
+        title: "Notifications",
+        icon: "bell",
+        action: .custom { /* handle tap */ }
+    ),
+    colors: colors,
     action: { /* handle tap */ }
 )
-.environmentObject(colors)
 ```
 
 ---

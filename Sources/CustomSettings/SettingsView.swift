@@ -15,24 +15,24 @@ import SwiftUI
 public struct SettingsView: View {
     private let colors: SettingsColors
     private let items: [SettingsItem]
-    public var isEditing: Bool
+    @Binding public var isEditing: Bool
 
-    public init(colors: SettingsColors, isEditing: Bool = false) {
+    public init(colors: SettingsColors, isEditing: Binding<Bool> = .constant(false)) {
         self.colors = colors
         self.items = []
-        self.isEditing = isEditing
+        self._isEditing = isEditing
     }
 
-    private init(colors: SettingsColors, items: [SettingsItem], isEditing: Bool) {
+    private init(colors: SettingsColors, items: [SettingsItem], isEditing: Binding<Bool>) {
         self.colors = colors
         self.items = items
-        self.isEditing = isEditing
+        self._isEditing = isEditing
     }
 
     // MARK: - Builder
 
     public func add(_ item: SettingsItem) -> SettingsView {
-        SettingsView(colors: colors, items: items + [item], isEditing: isEditing)
+        SettingsView(colors: colors, items: items + [item], isEditing: $isEditing)
     }
 
     // MARK: - Body
