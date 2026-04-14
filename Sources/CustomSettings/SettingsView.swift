@@ -102,6 +102,7 @@ public struct SettingsView: View {
         .sheet(item: $presentedURL) { url in
             WebViewSheet(url: url, title: urlTitle(for: url))
         }
+        .navigationBarBackButtonHidden(true)
     }
 
     // MARK: - Helpers

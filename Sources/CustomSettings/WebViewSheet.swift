@@ -16,7 +16,7 @@ struct WebViewSheet: View {
     @Environment(\.dismiss) private var dismiss
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             CustomWebView(url: url)
                 .navigationTitle(title)
                 .navigationBarTitleDisplayMode(.inline)
