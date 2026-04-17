@@ -13,9 +13,20 @@ import WebKit
 
 struct CustomWebView: UIViewRepresentable {
     let url: URL
-    
+
     func makeUIView(context: Context) -> WKWebView {
-        let webView = WKWebView()
+        let userScript = WKUserScript(
+            source: "document.querySelector('.back-link')?.remove();",
+            injectionTime: .atDocumentEnd,
+            forMainFrameOnly: true
+        )
+        let contentController = WKUserContentController()
+        contentController.addUserScript(userScript)
+
+        let configuration = WKWebViewConfiguration()
+        configuration.userContentController = contentController
+
+        let webView = WKWebView(frame: .zero, configuration: configuration)
         webView.navigationDelegate = context.coordinator
         return webView
     }
