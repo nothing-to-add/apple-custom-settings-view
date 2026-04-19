@@ -74,4 +74,8 @@ public extension SettingsItem {
     static func helpAndSupport(url: URL) -> SettingsItem {
         SettingsItem(title: "Help & Support", icon: "questionmark.circle", action: .url(url))
     }
+
+    static func feedback(appName: String, email: String) -> SettingsItem {
+        SettingsItem(title: "Feedback", icon: "envelope", action: .feedback(appName, email))
+    }
 }

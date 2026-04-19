@@ -89,6 +89,7 @@ public struct SettingsView: View {
     // MARK: - Body
 
     @State private var presentedURL: URL? = nil
+    @StateObject private var feedbackManager = FeedbackManager.shared
 
     public var body: some View {
         VStack(spacing: 12) {
@@ -102,6 +103,21 @@ public struct SettingsView: View {
         .sheet(item: $presentedURL) { url in
             WebViewSheet(url: url, title: urlTitle(for: url))
         }
+        .sheet(item: $feedbackManager.feedbackComposer) { composer in
+            FeedbackView(
+                recipient: composer.email,
+                appName: composer.appName,
+                feedbackManager: feedbackManager
+            )
+        }
+        .alert("Mail Not Available", isPresented: $feedbackManager.showingMailUnavailableAlert) {
+            Button("Copy Email") {
+                UIPasteboard.general.string = feedbackManager.email
+            }
+            Button("OK") { }
+        } message: {
+            Text("Please configure mail on your device or contact us at \(feedbackManager.email)")
+        }
         .navigationBarBackButtonHidden(true)
     }
 
@@ -111,6 +127,8 @@ public struct SettingsView: View {
         switch action {
         case .url(let url):
             presentedURL = url
+        case .feedback(let appName, let email):
+            feedbackManager.requestFeedback(appName: appName, email: email)
         case .custom(let closure):
             closure()
         }

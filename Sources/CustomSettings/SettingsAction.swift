@@ -33,6 +33,8 @@ public enum SettingsAction: @unchecked Sendable {
     /// Opens the given `URL` in an in-app ``WebViewSheet`` when the row is tapped.
     case url(URL)
 
+    case feedback(String, String)
+
     /// Executes the provided closure when the row is tapped.
     ///
     /// - Parameter closure: A zero-argument, non-throwing closure invoked on the main thread.
