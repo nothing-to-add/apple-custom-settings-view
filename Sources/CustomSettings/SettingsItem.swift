@@ -75,6 +75,21 @@ public extension SettingsItem {
         SettingsItem(title: "Help & Support", icon: "questionmark.circle", action: .url(url))
     }
 
+    /// A pre-built **Feedback** row that opens the native mail-compose sheet.
+    ///
+    /// Tapping the row triggers ``SettingsAction/feedback(_:_:)``, which is handled by
+    /// ``FeedbackManager``. If the device can send mail, `MFMailComposeViewController` is
+    /// presented pre-filled with the app name, recipient address, and a structured feedback
+    /// template. If mail is unavailable, a fallback alert prompts the user to copy the address.
+    ///
+    /// ```swift
+    /// SettingsView(colors: colors)
+    ///     .add(.feedback(appName: "MyApp", email: "feedback@example.com"))
+    /// ```
+    ///
+    /// - Parameters:
+    ///   - appName: The host app's display name used in the mail subject and body greeting.
+    ///   - email: The recipient e-mail address for the feedback message.
     static func feedback(appName: String, email: String) -> SettingsItem {
         SettingsItem(title: "Feedback", icon: "envelope", action: .feedback(appName, email))
     }

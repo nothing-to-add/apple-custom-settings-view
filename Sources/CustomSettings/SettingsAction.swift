@@ -33,6 +33,15 @@ public enum SettingsAction: @unchecked Sendable {
     /// Opens the given `URL` in an in-app ``WebViewSheet`` when the row is tapped.
     case url(URL)
 
+    /// Presents the native `MFMailComposeViewController` pre-filled with a feedback template.
+    ///
+    /// `SettingsView` handles this case automatically through ``FeedbackManager``.
+    /// If the device cannot send mail, a fallback alert is shown with the address so the
+    /// user can copy it manually.
+    ///
+    /// - Parameters:
+    ///   - appName: The host app's display name used in the mail subject and body greeting.
+    ///   - email: The recipient e-mail address for the feedback message.
     case feedback(String, String)
 
     /// Executes the provided closure when the row is tapped.

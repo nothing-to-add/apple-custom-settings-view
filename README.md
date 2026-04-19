@@ -18,11 +18,12 @@ A lightweight, Apple-style **Swift Package Manager** library that embeds a custo
 
 ## Features
 
-- 📋 **Built-in settings rows** — Privacy Policy, Terms of Service, and Help & Support, each opening in an in-app web sheet
+- 📋 **Built-in settings rows** — Privacy Policy, Terms of Service, Help & Support, and Feedback, each with a dedicated preset
+- 📬 **In-app feedback** — `.feedback(appName:email:)` opens a pre-filled `MFMailComposeViewController`; falls back to a copy-address alert when Mail is unavailable
 - 🎨 **Customisable colours** — configure icon foreground and button background colours via `SettingsColors`
 - 🔒 **Edit-mode support** — pass `isEditing` to disable all rows while the host app is in an edit state
 - 🌐 **Safe in-app web views** — `WebViewSheet` wraps `WKWebView` and blocks external navigation, keeping users inside the app
-- 📱 **SwiftUI native** — built entirely with SwiftUI (WebKit used only where system APIs require it)
+- 📱 **SwiftUI native** — built entirely with SwiftUI (WebKit and MessageUI used only where system APIs require it)
 - 🔒 **Swift 6 strict concurrency** — safe to use in fully concurrent codebases
 - 📦 **No external dependencies** — pure Swift, nothing to fetch
 
@@ -103,19 +104,21 @@ struct ContentView: View {
 
 ### Built-in preset items
 
-Three preset `SettingsItem` factories are provided out of the box. Each opens its URL in an in-app web sheet:
+Four preset `SettingsItem` factories are provided out of the box:
 
-| Factory                          | Default title      | SF Symbol            |
-|----------------------------------|--------------------|----------------------|
-| `.privacyPolicy(url:)`           | Privacy Policy     | `lock`               |
-| `.termsOfService(url:)`          | Terms of Service   | `doc.text`           |
-| `.helpAndSupport(url:)`          | Help & Support     | `questionmark.circle`|
+| Factory                                   | Default title      | SF Symbol             | Behaviour                              |
+|-------------------------------------------|--------------------|-----------------------|----------------------------------------|
+| `.privacyPolicy(url:)`                    | Privacy Policy     | `lock`                | Opens URL in in-app web sheet          |
+| `.termsOfService(url:)`                   | Terms of Service   | `doc.text`            | Opens URL in in-app web sheet          |
+| `.helpAndSupport(url:)`                   | Help & Support     | `questionmark.circle` | Opens URL in in-app web sheet          |
+| `.feedback(appName:email:)`               | Feedback           | `envelope`            | Opens native mail-compose sheet        |
 
 ```swift
 SettingsView(colors: colors)
     .add(.privacyPolicy(url: URL(string: "https://example.com/privacy")!))
     .add(.termsOfService(url: URL(string: "https://example.com/terms")!))
     .add(.helpAndSupport(url: URL(string: "https://example.com/support")!))
+    .add(.feedback(appName: "MyApp", email: "feedback@example.com"))
 ```
 
 ### Custom items
@@ -140,6 +143,40 @@ let logoutItem = SettingsItem(
 SettingsView(colors: colors)
     .add(shareItem)
     .add(logoutItem)
+```
+
+---
+
+## Feedback
+
+The `.feedback(appName:email:)` preset adds a **Feedback** row that opens the system mail-compose UI pre-filled with the recipient address, subject line, and a structured plain-text template that includes the user's device and app-version information.
+
+```swift
+SettingsView(colors: colors)
+    .add(.feedback(appName: "MyApp", email: "feedback@example.com"))
+```
+
+### How it works
+
+1. The user taps the **Feedback** row.
+2. `FeedbackManager` checks `MFMailComposeViewController.canSendMail()`.
+   - **Mail available** → the compose sheet appears pre-filled.
+   - **Mail unavailable** → a "Mail Not Available" alert is shown with a **Copy Email** button so the user can paste the address into another client.
+
+### Mail template
+
+The auto-generated body contains:
+
+- A personalised greeting using the app name
+- A placeholder section for the user's message
+- A technical footer with app version, build number, iOS version, device model/name, and current date
+
+### Feature-scoped feedback
+
+If you want to trigger feedback scoped to a specific feature from your own code:
+
+```swift
+let body = FeedbackManager.shared.createFeatureFeedbackTemplate("dark mode")
 ```
 
 ---
@@ -226,10 +263,11 @@ let colors = SettingsColors(
 
 Each `SettingsItem` carries a `SettingsAction` that determines what happens when the row is tapped:
 
-| Case              | Behaviour                                      |
-|-------------------|------------------------------------------------|
-| `.url(URL)`       | Opens the URL in an in-app `WebViewSheet`      |
-| `.custom(() -> Void)` | Calls the provided closure               |
+| Case                        | Behaviour                                                                                   |
+|-----------------------------|---------------------------------------------------------------------------------------------|
+| `.url(URL)`                 | Opens the URL in an in-app `WebViewSheet`                                                   |
+| `.feedback(String, String)` | Opens `MFMailComposeViewController` pre-filled with a feedback template; shows a copy-address alert if Mail is unavailable |
+| `.custom(() -> Void)`       | Calls the provided closure                                                                  |
 
 ### `SettingsRow`
 
