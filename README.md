@@ -287,6 +287,28 @@ SettingsRow(
 
 ---
 
+## Releases
+
+### [1.0.0](https://github.com/nothing-to-add/apple-custom-settings-view/releases/tag/1.0) — 21 April 2026
+
+Initial public release of **CustomSettings**.
+
+**What's included:**
+
+- `SettingsView` — SwiftUI view with a builder-pattern `.add(_:)` API for composing settings screens
+- `SettingsItem` — model type representing a single settings row (title, SF Symbol icon, action)
+- `SettingsAction` — enum covering `.url(_:)`, `.feedback(_:_:)`, and `.custom(_:)` actions
+- `SettingsRow` — standalone SwiftUI row component for custom layouts
+- `SettingsColors` — lightweight configuration type for icon and button-background colours
+- `FeedbackManager` / `FeedbackView` / `FeedbackComposer` — in-app mail-compose flow with device/app-version template; graceful fallback alert when Mail is unavailable
+- `WebViewSheet` / `CustomWebView` — in-app `WKWebView` sheet that blocks external navigation
+- Edit-mode support via `isEditing: Binding<Bool>`
+- Full Swift 6 strict-concurrency compliance
+- iOS 17+, macOS 13+, watchOS 9+, visionOS 1+ support
+- Zero external dependencies
+
+---
+
 ## License
 
 Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for full details.
